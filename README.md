@@ -22,7 +22,8 @@ Run `make` to build the solver.
 `satUZK-seq` is the basic sequential solver and accepts a SAT instance
 in DIMACS CNF format. `satUZK-par` is a parallel version.
 
-Use `./satUZK-seq <parameters> <instance file>` to run the solver.
+Use `./satUZK-seq <parameters> <instance file>` to run the sequential solver
+and `./satUZK-par <instance file>` to run the parallel solver.
 
 The following parameters are supported for `satUZK-seq`:
 - `-show-model` Prints a model if the instance is satisfiable
