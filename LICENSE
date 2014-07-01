@@ -1,0 +1,23 @@
+
+The code of the solver is provided only for evaluation and research purposes.
+You may modify the source code, provided that you add a notice of the use of
+the solver at a prominent point, e.g., within the changelog. We respectfully
+request that you notify us if you:
+
+* modify / improve upon the software
+* re-distribute the software
+
+Under no circumstances shall this software and associated documenation
+be used in a commercial endeavour without the prior expressed permission 
+of the authors. 
+
+For other licenses please contact the authors.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
