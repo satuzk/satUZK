@@ -287,6 +287,8 @@ void Config<BaseDefs, Hooks>::expellContaining(Config<BaseDefs, Hooks>::Literal 
 	
 	// remove long clauses
 	for(auto it = p_clauseConfig.begin(); it != p_clauseConfig.end(); ++it) {
+		if(!clauseIsPresent(*it))
+			continue;
 		if(!clauseContains(*it, lit))
 			continue;
 		if(clauseIsEssential(*it))
