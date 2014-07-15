@@ -244,7 +244,7 @@ public:
 		for(auto i = clauseBegin(clause); i != clauseEnd(clause); ++i) {
 			if(i != clauseBegin(clause))
 				string += ", ";
-			string += std::to_string(litNumber(*i));
+			string += std::to_string((*i).toNumber());
 		}
 		string += "}";
 		return string;
