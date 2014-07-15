@@ -729,6 +729,9 @@ void Config<BaseDefs, Hooks>::reduceClauses() {
 		stat.clauseRed.clausesConsidered++;
 	}
 	stat.clauseRed.reductionRuns++;
+	
+	// restart the solver after the reset
+	start();
 }
 
 template<typename BaseDefs, typename Hooks>
@@ -765,49 +768,45 @@ void Config<BaseDefs, Hooks>::checkClauseReduction() {
 
 template<typename BaseDefs, typename Hooks>
 void Config<BaseDefs, Hooks>::start() {
-	SYS_ASSERT(SYS_ASRT_GENERAL, p_conflictDesc.isNone());
+	SYS_ASSERT(SYS_ASRT_GENERAL, curDeclevel() == 0);
 	
 	// units are assigned on decision level 1
-	if(curDeclevel() == 0) {
-		pushLevel();
-		for(auto it = p_unitClauses.begin(); it != p_unitClauses.end(); ++it) {
-			if(litTrue(*it))
-				continue;
-			if(litFalse(*it)) {
-				raiseConflict(Conflict::makeFact(*it));
-				return;
-			}
-			
-			pushAssign(*it, Antecedent::makeDecision());
-			propagate();
-			if(atConflict())
-				return;
+	pushLevel();
+	for(auto it = p_unitClauses.begin(); it != p_unitClauses.end(); ++it) {
+		if(litTrue(*it))
+			continue;
+		if(litFalse(*it)) {
+			raiseConflict(Conflict::makeFact(*it));
+			return;
 		}
+			
+		pushAssign(*it, Antecedent::makeDecision());
+		propagate();
+		if(atConflict())
+			return;
 	}
 	
 	// assumptions are assigned on decision level 2
-	if(curDeclevel() == 1) {
-		pushLevel();
-		for(auto it = p_assumptionList.begin(); it != p_assumptionList.end(); ++it) {
-			SYS_ASSERT(SYS_ASRT_GENERAL, p_varConfig.getLitFlagAssumption(*it));
-			if(litTrue(*it))
-				continue;
-			if(litFalse(*it)) {
-				raiseConflict(Conflict::makeFact(*it));
-				return;
-			}
-			
-			pushAssign(*it, Antecedent::makeDecision());
-			propagate();
-			if(atConflict())
-				return;
+	pushLevel();
+	for(auto it = p_assumptionList.begin(); it != p_assumptionList.end(); ++it) {
+		SYS_ASSERT(SYS_ASRT_GENERAL, p_varConfig.getLitFlagAssumption(*it));
+		if(litTrue(*it))
+			continue;
+		if(litFalse(*it)) {
+			raiseConflict(Conflict::makeFact(*it));
+			return;
 		}
+		
+		pushAssign(*it, Antecedent::makeDecision());
+		propagate();
+		if(atConflict())
+			return;
 	}
-	SYS_ASSERT(SYS_ASRT_GENERAL, curDeclevel() >= 2);
 }
 
 template<typename BaseDefs, typename Hooks>
 void Config<BaseDefs, Hooks>::decide() {
+	SYS_ASSERT(SYS_ASRT_GENERAL, curDeclevel() >= 2);
 	SYS_ASSERT(SYS_ASRT_GENERAL, p_conflictDesc.isNone());
 	
 	// determine the variable with minimal VSIDS score
@@ -890,6 +889,7 @@ void Config<BaseDefs, Hooks>::resolveConflict() {
 	Variable uip_var = uip_literal.variable();
 	
 	// generate a clause for the conflict
+	SYS_ASSERT(SYS_ASRT_GENERAL, p_learnConfig.minSize() > 0);
 	Clause learned = allocClause(p_learnConfig.minSize(),
 			p_learnConfig.beginMin(), p_learnConfig.endMin());
 	
@@ -899,42 +899,53 @@ void Config<BaseDefs, Hooks>::resolveConflict() {
 	clauseSetLbd(learned, lbd);
 	clauseSetActivity(learned, state.search.clauseActInc);
 	
-	// backjump and reset the conflict state
-	SYS_ASSERT(SYS_ASRT_GENERAL, p_learnConfig.minSize() > 0);
-	if(p_learnConfig.minSize() > 1) {
-		Literal watch_lit = p_learnConfig.getMin(1);
-		Variable watch_var = watch_lit.variable();
-		backjump(varDeclevel(watch_var));
-	}else backjump(0);
-	p_conflictDesc = Conflict::makeNone();
+	Declevel level = 0;
+	if(p_learnConfig.minSize() > 1)
+		level = varDeclevel(p_learnConfig.getMin(1).variable());
 	
+	// backjump and reset the conflict state
+	if(level < 2) {
+		backjump(0);
+	}else{
+		backjump(level);
+	}
+	p_conflictDesc = Conflict::makeNone();
+
 	// assign the learned clause
 	// NOTE: this has to be done after doing the backjump
 	installClause(learned);
-	if(p_learnConfig.minSize() > 2) {
-		pushAssign(uip_literal, Antecedent::makeClause(learned));
-
-		// bump variables asserted by glue clauses as in glucose
-		if(opts.learn.bumpGlueTwice)
-			for(auto i = p_learnConfig.beginCurlevel();
-					i != p_learnConfig.endCurlevel(); ++i) {
-				Antecedent antecedent = varAntecedent(*i);
-				/*if(antecedent.isBinary() && lbd > 2) {
-					// cannot check if the clause is learned. do not bump for now!
-					//onVarActivity(*i);
-				}else if(antecedent.isClause()) {
-					Clause reason = antecedent.identifier.clause_ident;
-					if(!p_clauseConfig.getFlagEssential(reason)
-							&& clauseGetLbd(reason) < lbd)
-						onVarActivity(*i);
-				}*/
-			}
-	}else if(p_learnConfig.minSize() == 2) {
-		Literal reason_inverse = p_learnConfig.getMin(1);
-		Literal reason_literal = reason_inverse.inverse();
-		pushAssign(uip_literal, Antecedent::makeBinary(reason_literal));
-		stat.search.learnedBinary++;
+	if(level < 2) {
+		start();
 	}else{
+		SYS_ASSERT(SYS_ASRT_GENERAL, p_learnConfig.minSize() >= 2);
+		if(p_learnConfig.minSize() > 2) {
+			pushAssign(uip_literal, Antecedent::makeClause(learned));
+
+			// bump variables asserted by glue clauses as in glucose
+			if(opts.learn.bumpGlueTwice)
+				for(auto i = p_learnConfig.beginCurlevel();
+						i != p_learnConfig.endCurlevel(); ++i) {
+					Antecedent antecedent = varAntecedent(*i);
+					/*if(antecedent.isBinary() && lbd > 2) {
+						// cannot check if the clause is learned. do not bump for now!
+						//onVarActivity(*i);
+					}else if(antecedent.isClause()) {
+						Clause reason = antecedent.identifier.clause_ident;
+						if(!p_clauseConfig.getFlagEssential(reason)
+								&& clauseGetLbd(reason) < lbd)
+							onVarActivity(*i);
+					}*/
+				}
+		}else if(p_learnConfig.minSize() == 2) {
+			Literal reason_inverse = p_learnConfig.getMin(1);
+			Literal reason_literal = reason_inverse.inverse();
+			pushAssign(uip_literal, Antecedent::makeBinary(reason_literal));
+		}
+	}
+
+	if(p_learnConfig.minSize() == 2) {
+		stat.search.learnedBinary++;
+	}else if(p_learnConfig.minSize() == 1) {
 		stat.search.learnedUnits++;
 	}
 	
@@ -1155,45 +1166,40 @@ template<typename Hooks>
 void search(Hooks &hooks, satuzk::SolveState &cur_state,
 		TotalSearchStats &total_stats) {
 	auto start = sys::hptCurrent();
+
 	for(unsigned int i = 0; true; i++) {
-		hooks.propagate();
-		// propagation could lead to a conflict at declevels 1 or 2
-		if(hooks.atConflict()) {
-			if(!hooks.isResolveable())
-				break;
+		while(hooks.atConflict()) {
+			if(!hooks.isResolveable()) {
+				total_stats.elapsed += sys::hptElapsed(start);
+				if(hooks.isUnsatisfiable()) {
+					cur_state = satuzk::SolveState::kStateUnsatisfiable;
+				}else if(hooks.isFailedAssumption()) {
+					cur_state = satuzk::SolveState::kStateAssumptionFail;
+				}else SYS_CRITICAL("Illegal conflict state");
+				return;
+			}
 			hooks.resolveConflict();
 			hooks.increaseActivity();
-			hooks.checkRestart();
-			hooks.checkClauseReduction();
-			hooks.checkClauseGarbage();
-			continue;
+			hooks.propagate();
 		}
 		
-		// return after a certain conflict limit is reached
-		if(i > 1000)
-			break;
+		hooks.checkRestart();
+		hooks.checkClauseReduction();
+		hooks.checkClauseGarbage();
 		
-		hooks.start();
-		if(hooks.atConflict()) {
-			SYS_ASSERT(SYS_ASRT_GENERAL, !hooks.isResolveable());
-			break;
+		if(hooks.atLeaf()) {
+			total_stats.elapsed += sys::hptElapsed(start);
+			cur_state = satuzk::SolveState::kStateSatisfied;
+			return;
+		}else if(i > 1000) {
+			// return after a certain conflict limit is reached
+			total_stats.elapsed += sys::hptElapsed(start);
+			cur_state = satuzk::SolveState::kStateBreak;
+			return;
 		}
-		if(hooks.atLeaf())
-			break;
+		
 		hooks.decide();
-	}
-	
-	total_stats.elapsed += sys::hptElapsed(start);
-	if(hooks.atConflict() && !hooks.isResolveable()) {
-		if(hooks.isUnsatisfiable()) {
-			cur_state = satuzk::SolveState::kStateUnsatisfiable;
-		}else if(hooks.isFailedAssumption()) {
-			cur_state = satuzk::SolveState::kStateAssumptionFail;
-		}else SYS_CRITICAL("Illegal conflict state");
-	}else if(!hooks.atConflict() && hooks.atLeaf()) {
-		cur_state = satuzk::SolveState::kStateSatisfied;
-	}else{
-		cur_state = satuzk::SolveState::kStateBreak;
+		hooks.propagate();
 	}
 }
 

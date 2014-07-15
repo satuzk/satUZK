@@ -23,6 +23,7 @@ void SolverThread::checkReduced() {
 			SolverConfig::Clause clause = p_config.allocClause(length, literals.begin(), literals.end());
 			p_config.clauseSetLbd(clause, lbd);
 			p_config.quickFreezeClause(clause);
+			p_config.start();
 			stat.imported++;
 		}
 	}
@@ -50,7 +51,6 @@ void SolverThread::checkCommand() {
 				clause.push_back(literal);
 			}
 			
-			p_config.reset();
 			p_config.inputClause(length, clause.begin(), clause.end());
 			p_config.inputFinish();
 		}else if(tag == CommandTag::kInitialize) {
@@ -58,12 +58,16 @@ void SolverThread::checkCommand() {
 			std::cout << "c initialize time: " << sysGetCpuTime() << " ms" << std::endl;
 			progressHeader(p_config);
 		}else if(tag == CommandTag::kContinue) {
+			p_config.reset();
+			p_config.start();
+
 			p_solveActive = true;
 		}else if(tag == CommandTag::kAssume) {
 			auto literal = SolverConfig::Literal::fromIndex(p_commandConsumer.read<BaseDefs::LiteralIndex>());
 			
 			p_config.reset();
 			p_config.assumptionEnable(literal);
+			p_config.start();
 		}else if(tag == CommandTag::kUnassume) {
 			auto variable = SolverConfig::Variable::fromIndex(p_commandConsumer.read<BaseDefs::LiteralIndex>());
 
@@ -73,9 +77,11 @@ void SolverThread::checkCommand() {
 			if(p_config.isAssumed(lit0)) {
 				p_config.reset();
 				p_config.assumptionDisable(lit0);
+				p_config.start();
 			}else if(p_config.isAssumed(lit1)) {
 				p_config.reset();
 				p_config.assumptionDisable(lit1);
+				p_config.start();
 			}else SYS_CRITICAL("Variable is not assumed");
 		}else SYS_CRITICAL("Illegal solver command");
 	}

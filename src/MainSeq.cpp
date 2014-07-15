@@ -153,6 +153,8 @@ satuzk::SolveState solve(OurConfig &config) {
 
 	satuzk::TotalSearchStats search_total_stats;
 
+	config.start();
+
 	while(true) {
 		if(config.state.general.stopSolve)
 			return satuzk::SolveState::kStateBreak;
