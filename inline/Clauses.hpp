@@ -59,6 +59,9 @@ public:
 		static const uint32_t kFlagEssential = 4;
 		// clause is frozen, i.e. not installed but will be reinstalled later
 		static const uint32_t kFlagFrozen = 8;
+		// the clause has been marked by some algorithm.
+		// algorithms should remove this mark after they are done.
+		static const uint32_t kFlagMarked = 16;
 		// clause has been moved/dropped during garbage collection
 		static const uint32_t kFlagCollectMoved = 32;
 		static const uint32_t kFlagCollectDropped = 64;
@@ -240,6 +243,10 @@ public:
 	void setFlagFrozen(Clause clause) { p_accessHead(clause.getIndex())->flags |= ClauseHead::kFlagFrozen; }
 	bool getFlagFrozen(Clause clause) { return p_accessHead(clause.getIndex())->flags & ClauseHead::kFlagFrozen; }
 	void unsetFlagFrozen(Clause clause) { p_accessHead(clause.getIndex())->flags &= ~ClauseHead::kFlagFrozen; }
+	
+	void setFlagMarked(Clause clause) { p_accessHead(clause.getIndex())->flags |= ClauseHead::kFlagMarked; }
+	bool getFlagMarked(Clause clause) { return p_accessHead(clause.getIndex())->flags & ClauseHead::kFlagMarked; }
+	void unsetFlagMarked(Clause clause) { p_accessHead(clause.getIndex())->flags &= ~ClauseHead::kFlagMarked; }
 
 	bool getFlagImproved(Clause clause) { return p_accessHead(clause.getIndex())->flags & ClauseHead::kFlagImproved; }
 	void setFlagImproved(Clause clause) { p_accessHead(clause.getIndex())->flags |= ClauseHead::kFlagImproved; }

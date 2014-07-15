@@ -275,6 +275,10 @@ public:
 	void clauseSetEssential(Clause clause);
 	void clauseUnsetEssential(Clause clause);
 	bool clauseIsEssential(Clause clause);
+
+	void markClause(Clause clause);
+	void unmarkClause(Clause clause);
+	bool clauseIsMarked(Clause clause);
 	
 	/* returns true if the clause is currently unit or unsatisfied.
 	 * only returns a valid result after propagation is done */

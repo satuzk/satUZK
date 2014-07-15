@@ -38,13 +38,19 @@ void unhideStamp(Hooks &hooks,
 		if(!(*i).isBinary())
 			continue;
 
+		// ignore edges marked as transitive
+		auto bin_clause = (*i).binaryGetClause();
+		if(hooks.clauseIsMarked(bin_clause))
+			continue;
+
 		auto dest = (*i).binaryGetImplied();
 		auto inverse = dest.inverse();
 
 		// check if we found a transitive edge
 		if(preorder[literal.getIndex()] < observed[dest.getIndex()]) {
 			// mark the edges (and reverse edge) as transitive
-			redundant.push_back((*i).binaryGetClause());
+			redundant.push_back(bin_clause);
+			hooks.markClause(bin_clause);
 			
 			hooks.stat.simp.unhideTransitiveEdges++;
 			run_stats.transitiveEdges++;

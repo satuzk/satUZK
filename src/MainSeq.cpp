@@ -128,12 +128,12 @@ satuzk::SolveState solve(OurConfig &config) {
 
 	auto preproc_start = sys::hptCurrent();
 
-//	UnhideRunStats stat_unhide;
+	UnhideRunStats stat_unhide;
 	bceEliminateAll(config);
 	vecdEliminateAll(config);
 	selfsubEliminateAll(config);
-//	for(int i = 0; i < 5; i++)
-//		unhideEliminateAll(config, true, stat_unhide);
+	for(int i = 0; i < 5; i++)
+		unhideEliminateAll(config, true, stat_unhide);
 
 	config.perf.preprocTime += sys::hptElapsed(preproc_start);
 	

@@ -172,6 +172,21 @@ bool Config<BaseDefs, Hooks>::clauseIsEssential(Config<BaseDefs, Hooks>::Clause 
 	return p_clauseConfig.getFlagEssential(clause);
 }
 
+template<typename BaseDefs, typename Hooks>
+void Config<BaseDefs, Hooks>::markClause(Config<BaseDefs, Hooks>::Clause clause) {
+	SYS_ASSERT(SYS_ASRT_GENERAL, !p_clauseConfig.getFlagMarked(clause));
+	p_clauseConfig.setFlagMarked(clause);
+}
+template<typename BaseDefs, typename Hooks>
+void Config<BaseDefs, Hooks>::unmarkClause(Config<BaseDefs, Hooks>::Clause clause) {
+	SYS_ASSERT(SYS_ASRT_GENERAL, p_clauseConfig.getFlagMarked(clause));
+	p_clauseConfig.unsetFlagMarked(clause);
+}
+template<typename BaseDefs, typename Hooks>
+bool Config<BaseDefs, Hooks>::clauseIsMarked(Config<BaseDefs, Hooks>::Clause clause) {
+	return p_clauseConfig.getFlagMarked(clause);
+}
+
 // callback functor used during collectClauses()
 template<typename Config>
 class DelClauseCallback {
