@@ -17,6 +17,7 @@ public:
 	static ConflictStruct<BaseDefs> makeClause(Clause clause);
 	static ConflictStruct<BaseDefs> makeBinary(Literal literal1, Literal literal2);
 	static ConflictStruct<BaseDefs> makeFact(Literal literal);
+	static ConflictStruct<BaseDefs> makeEmpty();
 
 	bool operator== (AntecedentStruct<BaseDefs> other);
 	bool operator!= (AntecedentStruct<BaseDefs> other);
@@ -25,6 +26,7 @@ public:
 	bool isClause();
 	bool isBinary();
 	bool isFact();
+	bool isEmpty();
 
 	Clause getClause();
 	Literal getLiteral1();
@@ -35,6 +37,7 @@ private:
 	static const uint32_t kTypeClause = 1;
 	static const uint32_t kTypeBinary = 2;
 	static const uint32_t kTypeFact = 3;
+	static const uint32_t kTypeEmpty = 4;
 
 	uint32_t type;
 	

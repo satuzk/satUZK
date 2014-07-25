@@ -772,6 +772,10 @@ void Config<BaseDefs, Hooks>::start() {
 	
 	// units are assigned on decision level 1
 	pushLevel();
+	if(!p_emptyClauses.empty()) {
+		raiseConflict(Conflict::makeEmpty());
+		return;
+	}
 	for(auto it = p_unitClauses.begin(); it != p_unitClauses.end(); ++it) {
 		if(litTrue(*it))
 			continue;
@@ -1008,7 +1012,6 @@ template<typename BaseDefs, typename Hooks>
 template<typename Iterator>
 typename Config<BaseDefs, Hooks>::Clause Config<BaseDefs, Hooks>::allocClause(
 		Config<BaseDefs, Hooks>::ClauseLitIndex length, Iterator begin, Iterator end) {
-	SYS_ASSERT(SYS_ASRT_GENERAL, length > 0);
 	unsigned int mem_estimate = p_clauseConfig.calcBytes(length)
 			+ kClauseAlignment;
 	
@@ -1079,7 +1082,9 @@ template<typename BaseDefs, typename Hooks>
 void Config<BaseDefs, Hooks>::installClause(Config<BaseDefs, Hooks>::Clause clause) {
 	SYS_ASSERT(SYS_ASRT_GENERAL, !p_clauseConfig.getFlagInstalled(clause));
 
-	if(clauseLength(clause) == 1) {
+	if(clauseLength(clause) == 0) {
+		p_emptyClauses.push_back(clause);
+	}else if(clauseLength(clause) == 1) {
 		Literal lit = clauseGetFirst(clause);
 		p_unitClauses.push_back(lit);
 	}else if(clauseLength(clause) == 2) {

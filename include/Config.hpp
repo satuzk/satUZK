@@ -585,6 +585,8 @@ public:
 	VarConfig p_varConfig;
 	ClauseConfig p_clauseConfig;
 	
+	// stores all empty clauses
+	std::vector<Clause> p_emptyClauses;
 	// stores all unit clauses
 	std::vector<Literal> p_unitClauses;
 	// stores all active assumptions

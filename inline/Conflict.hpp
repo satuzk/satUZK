@@ -37,6 +37,14 @@ ConflictStruct<BaseDefs> ConflictStruct<BaseDefs>::makeFact(Literal literal) {
 	result.literals.l1 = literal.getIndex();
 	return result;
 }
+template<typename BaseDefs>
+ConflictStruct<BaseDefs> ConflictStruct<BaseDefs>::makeEmpty() {
+	ConflictStruct<BaseDefs> result;
+	result.padding.p1 = 0;
+	result.padding.p2 = 0;
+	result.type = kTypeEmpty;
+	return result;
+}
 
 template<typename BaseDefs>
 bool ConflictStruct<BaseDefs>::operator== (AntecedentStruct<BaseDefs> other) {
@@ -66,6 +74,10 @@ bool ConflictStruct<BaseDefs>::isBinary() {
 template<typename BaseDefs>
 bool ConflictStruct<BaseDefs>::isFact() {
 	return type == kTypeFact;
+}
+template<typename BaseDefs>
+bool ConflictStruct<BaseDefs>::isEmpty() {
+	return type == kTypeEmpty;
 }
 
 template<typename BaseDefs>
