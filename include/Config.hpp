@@ -457,6 +457,7 @@ public:
 	/* ------------------ CONFLICT MANAGEMENT ------------------------------ */
 
 	void raiseConflict(Conflict conflict);
+	void resetConflict();
 
 	bool atConflict() { return !p_conflictDesc.isNone(); }
 

@@ -872,6 +872,11 @@ void Config<BaseDefs, Hooks>::raiseConflict(Conflict conflict) {
 }
 
 template<typename BaseDefs, typename Hooks>
+void Config<BaseDefs, Hooks>::resetConflict() {
+	p_conflictDesc = Conflict::makeNone();
+}
+
+template<typename BaseDefs, typename Hooks>
 void Config<BaseDefs, Hooks>::resolveConflict() {
 	SYS_ASSERT(SYS_ASRT_GENERAL, isResolveable());
 
