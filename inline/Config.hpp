@@ -913,7 +913,7 @@ void Config<BaseDefs, Hooks>::resolveConflict() {
 		level = varDeclevel(p_learnConfig.getMin(1).variable());
 	
 	// backjump and reset the conflict state
-	if(level < 2) {
+	if(level <= 2) {
 		backjump(0);
 	}else{
 		backjump(level);
@@ -923,7 +923,7 @@ void Config<BaseDefs, Hooks>::resolveConflict() {
 	// assign the learned clause
 	// NOTE: this has to be done after doing the backjump
 	installClause(learned);
-	if(level < 2) {
+	if(level <= 2) {
 		start();
 	}else{
 		SYS_ASSERT(SYS_ASRT_GENERAL, p_learnConfig.minSize() >= 2);
