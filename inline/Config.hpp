@@ -292,6 +292,22 @@ void Config<BaseDefs, Hooks>::checkClauseGarbage() {
 }
 
 template<typename BaseDefs, typename Hooks>
+void Config<BaseDefs, Hooks>::expellLearned() {
+	SYS_ASSERT(SYS_ASRT_GENERAL, currentAssignedVars == 0);
+	
+	// remove long clauses
+	for(auto it = p_clauseConfig.begin(); it != p_clauseConfig.end(); ++it) {
+		if(!clauseIsPresent(*it))
+			continue;
+		if(clauseIsEssential(*it))
+			continue;
+		if(!clauseIsFrozen(*it))
+			uninstallClause(*it);
+		deleteClause(*it);
+	}
+}
+
+template<typename BaseDefs, typename Hooks>
 void Config<BaseDefs, Hooks>::expellContaining(Config<BaseDefs, Hooks>::Literal lit) {
 	SYS_ASSERT(SYS_ASRT_GENERAL, currentAssignedVars == 0);
 	

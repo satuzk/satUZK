@@ -320,6 +320,8 @@ public:
 	// checks whether a garbage collection is necessary
 	void checkClauseGarbage();
 
+	// removes all learned (i.e. not essential) clauses
+	void expellLearned();
 	// removes all clauses containing the specified literal
 	void expellContaining(Literal lit);
 
