@@ -15,6 +15,9 @@ public:
 	static VariableType<BaseDefs> fromIndex(Index index) {
 		return VariableType<BaseDefs>(index);
 	}
+	static VariableType<BaseDefs> fromNumber(int64_t number) {
+		return VariableType<BaseDefs>(number - 1);
+	}
 	
 	VariableType() : p_index(-1) { }
 	
@@ -50,6 +53,10 @@ public:
 	}
 	static LiteralType<BaseDefs> fromIndex(Index index) {
 		return LiteralType<BaseDefs>(index);
+	}
+	static LiteralType<BaseDefs> fromNumber(int64_t number) {
+		return number < 0 ? (VariableType<BaseDefs>::fromNumber(-number)).zeroLiteral()
+				: (VariableType<BaseDefs>::fromNumber(number)).oneLiteral();
 	}
 
 	LiteralType() : p_index(-1) { }
@@ -554,6 +561,16 @@ public:
 	}
 	bool operator!= (const VarIterator<BaseDefs> &other) {
 		return !(*this == other);
+	}
+	bool operator < (const VarIterator<BaseDefs> &other) {
+		return p_index < other.p_index;
+	}
+
+	VarIterator operator+ (int offset) {
+		return VarIterator(p_index + offset);
+	}
+	void operator+= (int offset) {
+		p_index += offset;
 	}
 
 	VariableType<BaseDefs> operator* () {
