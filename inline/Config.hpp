@@ -1213,6 +1213,10 @@ void search(Hooks &hooks, satuzk::SolveState &cur_state,
 		hooks.checkClauseReduction();
 		hooks.checkClauseGarbage();
 		
+		// unfreezing can cause conflicts
+		if(hooks.atConflict())
+			continue;
+		
 		if(hooks.atLeaf()) {
 			total_stats.elapsed += sys::hptElapsed(start);
 			cur_state = satuzk::SolveState::kStateSatisfied;
