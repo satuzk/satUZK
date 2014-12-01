@@ -16,6 +16,8 @@
 #include <csignal>
 #include <cassert>
 
+#include "../Config.hpp"
+
 #include "../inline/sys/Debug.hpp"
 #include "../inline/sys/Reporter.hpp"
 #include "../inline/sys/Performance.hpp"
@@ -190,6 +192,13 @@ void onInterrupt(int sig) {
 }
 
 int main(int argc, char **argv) {
+	std::cout << "c revision " << CONFIG_REVISION
+#ifdef CONFIG_DIRTY
+		<< "*"
+#endif
+		<< std::endl;
+	std::cout << "c '" << CONFIG_TARGET << "' build from " << CONFIG_DATE << " utc" << std::endl;
+
 	OurConfig &config = *the_config;
 	config.opts.general.verbose = 1;
 

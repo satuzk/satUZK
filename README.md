@@ -1,8 +1,6 @@
 
 # satUZK
 
-Build: 59
-
 Authors: Alexander van der Grinten, Andreas Wotzlaw and Ewald Speckenmeyer
 
 University of Cologne
