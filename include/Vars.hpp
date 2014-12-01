@@ -312,14 +312,11 @@ public:
 		p_antecedents.reserve(count);
 
 		p_litflags.reserve(2 * count);
-		p_occlists.reserve(2 * count);
 		p_watchlists.reserve(2 * count);
-		p_equivPointer.reserve(2 * count);
 	}
 
 	Variable allocVar() {
 		Index index = p_assigns.size();
-		SYS_ASSERT(SYS_ASRT_GENERAL, p_occlists.size() == 2 * index);
 		SYS_ASSERT(SYS_ASRT_GENERAL, p_watchlists.size() == 2 * index);
 		
 		AssignInfo initial_assign;
@@ -329,12 +326,8 @@ public:
 
 		Flags initial_litflags1 = 0;
 		Flags initial_litflags2 = 0;
-		Occlist initial_occlist1;
-		Occlist initial_occlist2;
 		Watchlist initial_watchlist1;
 		Watchlist initial_watchlist2;
-		Literal initial_equivalent1 = Literal::fromIndex(2 * index);
-		Literal initial_equivalent2 = Literal::fromIndex(2 * index + 1);
 
 		p_assigns.push_back(initial_assign);
 		p_varflags.push_back(initial_flags);
@@ -343,12 +336,8 @@ public:
 
 		p_litflags.push_back(initial_litflags1);
 		p_litflags.push_back(initial_litflags2);
-		p_occlists.emplace_back(std::move(initial_occlist1));
-		p_occlists.emplace_back(std::move(initial_occlist2));
 		p_watchlists.emplace_back(std::move(initial_watchlist1));
 		p_watchlists.emplace_back(std::move(initial_watchlist2));
-		p_equivPointer.push_back(initial_equivalent1);
-		p_equivPointer.push_back(initial_equivalent2);
 
 		p_presentCount++;
 		return Variable::fromIndex(index);
@@ -437,7 +426,10 @@ public:
 	// -----------------------------------------------------------------
 	// occlist related functions
 	// -----------------------------------------------------------------
-	
+
+	void occurPrepare();
+	void occurFinish();
+
 	void occurInsert(Literal literal, Clause clause);
 	void occurRemove(Literal literal, Clause clause);
 	void occurClear(Literal literal) {
@@ -505,6 +497,20 @@ public:
 	// -----------------------------------------------------------------
 	// equivalence related functions
 	// -----------------------------------------------------------------
+
+	void equivPrepare() {
+		for(Index i = 0; i < p_assigns.size(); i++) {
+			Literal initial_equivalent1 = Literal::fromIndex(2 * i);
+			Literal initial_equivalent2 = Literal::fromIndex(2 * i + 1);
+
+			p_equivPointer.push_back(initial_equivalent1);
+			p_equivPointer.push_back(initial_equivalent2);
+		}
+	}
+
+	void equivFinish() {
+		p_equivPointer.clear();
+	}
 
 	Literal equivalent(Literal literal) {
 		Literal root = literal;

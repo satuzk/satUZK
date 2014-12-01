@@ -64,6 +64,16 @@ typename WatchlistEntryStruct<BaseDefs>::Literal WatchlistEntryStruct<BaseDefs>:
 // -----------------------------------------------------------------
 
 template<typename BaseDefs>
+void VarConfigStruct<BaseDefs>::occurPrepare() {
+	p_occlists.resize(p_assigns.size() * 2);
+}
+
+template<typename BaseDefs>
+void VarConfigStruct<BaseDefs>::occurFinish() {
+	p_occlists.clear();
+}
+
+template<typename BaseDefs>
 void VarConfigStruct<BaseDefs>::occurInsert(Literal literal, Clause clause) {
 	p_occlists[literal.getIndex()].insert(clause);
 }

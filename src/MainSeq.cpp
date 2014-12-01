@@ -196,7 +196,7 @@ int main(int argc, char **argv) {
 	if(signal(SIGINT, onInterrupt) == SIG_ERR
 			|| signal(SIGXCPU, onInterrupt) == SIG_ERR)
 		throw std::runtime_error("Could not install signal handler");
-
+	
 	// parse the parameters given to the solver
 	std::vector<std::string> args;
 	for(int i = 1; i < argc; ++i)

@@ -114,7 +114,7 @@ void Config<BaseDefs, Hooks>::ensureClauseSpace(unsigned int free_required) {
 		std::cout << "c [GC    ] Extending clause space to " << (final_space / 1024) << " kb" << std::endl;
 
 	void *old_pointer = p_clauseConfig.p_allocator.getPointer();
-	void *new_pointer = operator new(final_space);
+	void *new_pointer = operator new(final_space, std::nothrow);
 	if(new_pointer == NULL)
 		SYS_CRITICAL("Out of memory\n");
 	p_clauseConfig.p_allocator.moveTo(new_pointer, final_space);
@@ -430,6 +430,7 @@ bool Config<BaseDefs, Hooks>::watchContainsBinary(Config<BaseDefs, Hooks>::Liter
 template<typename BaseDefs, typename Hooks>
 void Config<BaseDefs, Hooks>::occurConstruct() {
 	SYS_ASSERT(SYS_ASRT_GENERAL, !maintainOcclists);
+	p_varConfig.occurPrepare();
 	for(auto i = clausesBegin(); i != clausesEnd(); ++i) {
 		for(auto j = clauseBegin(*i); j != clauseEnd(*i); ++j)
 			p_varConfig.occurInsert(*j, *i);
@@ -446,6 +447,7 @@ void Config<BaseDefs, Hooks>::occurDestruct() {
 		p_varConfig.occurClear((*it).oneLiteral());
 		p_varConfig.occurShrink((*it).oneLiteral());
 	}
+	p_varConfig.occurFinish();
 	maintainOcclists = false;
 }
 

@@ -249,6 +249,8 @@ void unhideEliminateAll(Hooks &hooks,
 
 	std::vector<typename Hooks::Clause> redundant;
 
+	hooks.equivPrepare();
+
 	for(auto i = var_queue.begin(); i != var_queue.end(); ++i) {
 		auto zero_lit = (*i).zeroLiteral();
 		auto one_lit = (*i).oneLiteral();
@@ -274,6 +276,7 @@ void unhideEliminateAll(Hooks &hooks,
 	
 	// substitute equivalent literals
 	equivReplaceAll(hooks);
+	hooks.equivFinish();
 
 	// perform hle and hte
 	UnhidingPreoderLt<Hooks> comparator(preorder);

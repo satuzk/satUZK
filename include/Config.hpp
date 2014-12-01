@@ -185,6 +185,13 @@ public:
 	//FIXME: why do we need this?
 	bool varIsFixed(Variable var);
 
+	void equivPrepare() {
+		p_varConfig.equivPrepare();
+	}
+	void equivFinish() {
+		p_varConfig.equivFinish();
+	}
+
 	Literal litEquivalent(Literal literal) {
 		return p_varConfig.equivalent(literal);
 	}
