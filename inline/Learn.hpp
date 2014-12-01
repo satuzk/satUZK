@@ -180,8 +180,6 @@ template<typename Hooks>
 void LearnConfigStruct<BaseDefs>::cut(Hooks &hooks,
 		typename Hooks::ConflictIterator begin,
 		typename Hooks::ConflictIterator end) {
-	typedef typename Hooks::Literal Literal;
-	
 	// reserve space for the first uip
 	SYS_ASSERT(SYS_ASRT_GENERAL, p_cutVars.size() == 0);
 	p_cutVars.push_back(Hooks::Variable::illegalVar());
