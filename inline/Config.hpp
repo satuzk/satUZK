@@ -1196,28 +1196,30 @@ void search(Hooks &hooks, satuzk::SolveState &cur_state,
 	auto start = sys::hptCurrent();
 
 	for(unsigned int i = 0; true; i++) {
-		while(hooks.atConflict()) {
-			if(!hooks.isResolveable()) {
-				total_stats.elapsed += sys::hptElapsed(start);
-				if(hooks.isUnsatisfiable()) {
-					cur_state = satuzk::SolveState::kStateUnsatisfiable;
-				}else if(hooks.isFailedAssumption()) {
-					cur_state = satuzk::SolveState::kStateAssumptionFail;
-				}else SYS_CRITICAL("Illegal conflict state");
-				return;
+		if(hooks.atConflict()) {
+			while(hooks.atConflict()) {
+				if(!hooks.isResolveable()) {
+					total_stats.elapsed += sys::hptElapsed(start);
+					if(hooks.isUnsatisfiable()) {
+						cur_state = satuzk::SolveState::kStateUnsatisfiable;
+					}else if(hooks.isFailedAssumption()) {
+						cur_state = satuzk::SolveState::kStateAssumptionFail;
+					}else SYS_CRITICAL("Illegal conflict state");
+					return;
+				}
+				hooks.resolveConflict();
+				hooks.increaseActivity();
+				hooks.propagate();
 			}
-			hooks.resolveConflict();
-			hooks.increaseActivity();
-			hooks.propagate();
+		
+			hooks.checkRestart();
+			hooks.checkClauseReduction();
+			hooks.checkClauseGarbage();
+		
+			// unfreezing can cause conflicts
+			if(hooks.atConflict())
+				continue;
 		}
-		
-		hooks.checkRestart();
-		hooks.checkClauseReduction();
-		hooks.checkClauseGarbage();
-		
-		// unfreezing can cause conflicts
-		if(hooks.atConflict())
-			continue;
 		
 		if(hooks.atLeaf()) {
 			total_stats.elapsed += sys::hptElapsed(start);
