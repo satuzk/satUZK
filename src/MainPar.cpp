@@ -15,6 +15,8 @@
 #include <csignal>
 #include <thread>
 
+#include "../Config.hpp"
+
 #include "../include/util/concurrent/SingleProducerPipe.hpp"
 
 #include "../inline/sys/Debug.hpp"
@@ -79,6 +81,14 @@ void onInterrupt(int sig) {
 }
 
 int main(int argc, char **argv) {
+	std::cout << "c this is satUZK-par, '" << CONFIG_BRANCH << "' branch" << std::endl;
+	std::cout << "c revision " << CONFIG_REVISION
+#ifdef CONFIG_DIRTY
+		<< "*"
+#endif
+		<< std::endl;
+	std::cout << "c '" << CONFIG_TARGET << "' build from " << CONFIG_DATE << " utc" << std::endl;
+
 	if(signal(SIGINT, onInterrupt) == SIG_ERR
 			|| signal(SIGXCPU, onInterrupt) == SIG_ERR)
 		throw std::runtime_error("Could not install signal handler");
