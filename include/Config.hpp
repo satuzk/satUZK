@@ -431,10 +431,8 @@ public:
 	void start();
 
 	// decides which variable should be assigned next and assigns the variable.
-	void decide();
-	
-	// returns true if we are at a satisfiable assignment
-	bool atLeaf() { return currentAssignedVars == p_varConfig.count(); }
+	// returns false if all no decision could be taken (i.e. the solver is in a satisfied state)
+	bool decide();
 
 	// helper functions to rescale activity in order to prevent overflows
 	void scaleVarActivity(Activity divisor);

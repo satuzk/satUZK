@@ -336,6 +336,7 @@ int main(int argc, char **argv) {
 			
 			if(show_model) {
 				std::cout << "v";
+				bool free_variables = false;
 				for(long i = 1; i <= read_hooks.numVariables(); ++i) {
 					// TODO: don't include non-assigned variables?
 					if(model[i].isTrue()) {
@@ -343,12 +344,12 @@ int main(int argc, char **argv) {
 					}else if(model[i].isFalse()) {
 						std::cout << " " << -i;
 					}else{
-						std::cout << std::endl;
-						std::cout << "c " << i << " is free" << std::endl;
-						std::cout << "v";
+						free_variables = true;
 					}
 				}
 				std::cout << " 0" << std::endl;
+				if(free_variables)
+					std::cout << "c There were free variables!" << std::endl;
 			}
 		}else if(result == satuzk::kStateUnsatisfiable) {
 			std::cout << "s UNSATISFIABLE" << std::endl;

@@ -102,7 +102,10 @@ public:
 	bool isInserted(Variable variable) {
 		return p_varInfos[variable.getIndex()].index != HeapHooksStruct::kIllegalIndex;
 	}
-	
+
+	bool hasMaximum() {
+		return p_heapSize > 0;
+	}
 	Variable removeMaximum() {
 		HeapHooksStruct heap_hooks(*this);
 		return util::binary_heap::removeMinimum(heap_hooks);

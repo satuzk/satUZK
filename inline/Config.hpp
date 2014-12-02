@@ -481,6 +481,7 @@ void Config<BaseDefs, Hooks>::pushAssign(Config<BaseDefs, Hooks>::Literal litera
 	// variables are never pushed twice!
 	Variable var = literal.variable();
 	SYS_ASSERT(SYS_ASRT_GENERAL, !varAssigned(var));
+	SYS_ASSERT(SYS_ASRT_GENERAL, varIsPresent(var));
 	
 	p_propagateConfig.pushAssign(literal);
 
@@ -514,7 +515,7 @@ void Config<BaseDefs, Hooks>::popAssign() {
 	currentAssignedVars--;
 
 	// reinsert the variable into the heap
-	if(!p_vsidsConfig.isInserted(var))
+	if(!p_vsidsConfig.isInserted(var) && varIsPresent(var))
 		p_vsidsConfig.insertVariable(var);
 
 //		std::cout << "[POP] Literal " << literal << std::endl;
@@ -827,14 +828,17 @@ void Config<BaseDefs, Hooks>::start() {
 }
 
 template<typename BaseDefs, typename Hooks>
-void Config<BaseDefs, Hooks>::decide() {
+bool Config<BaseDefs, Hooks>::decide() {
 	SYS_ASSERT(SYS_ASRT_GENERAL, curDeclevel() >= 2);
 	SYS_ASSERT(SYS_ASRT_GENERAL, p_conflictDesc.isNone());
 	
 	// determine the variable with minimal VSIDS score
-	Variable var = p_vsidsConfig.removeMaximum();
-	while(varAssigned(var))
+	Variable var;
+	do {
+		if(!p_vsidsConfig.hasMaximum())
+			return false;
 		var = p_vsidsConfig.removeMaximum();
+	} while(varAssigned(var) || !varIsPresent(var));
 		
 	bool saved_one = p_varConfig.getVarFlagSaved(var);
 	Literal decliteral = saved_one ? var.oneLiteral() : var.zeroLiteral();
@@ -842,6 +846,7 @@ void Config<BaseDefs, Hooks>::decide() {
 	// create a new decision level; assign the variable
 	pushLevel();
 	pushAssign(decliteral, Antecedent::makeDecision());
+	return true;
 }
 
 template<typename BaseDefs, typename Hooks>
@@ -1221,18 +1226,18 @@ void search(Hooks &hooks, satuzk::SolveState &cur_state,
 				continue;
 		}
 		
-		if(hooks.atLeaf()) {
-			total_stats.elapsed += sys::hptElapsed(start);
-			cur_state = satuzk::SolveState::kStateSatisfied;
-			return;
-		}else if(i > 1000) {
+		if(i > 1000) {
 			// return after a certain conflict limit is reached
 			total_stats.elapsed += sys::hptElapsed(start);
 			cur_state = satuzk::SolveState::kStateBreak;
 			return;
 		}
 		
-		hooks.decide();
+		if(!hooks.decide()) {
+			total_stats.elapsed += sys::hptElapsed(start);
+			cur_state = satuzk::SolveState::kStateSatisfied;
+			return;
+		}
 		hooks.propagate();
 	}
 }
