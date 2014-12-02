@@ -40,19 +40,19 @@ struct ExtModelConfigStruct {
 			typename Hooks::Literal blocking);
 
 	template<typename Hooks>
-	bool checkStoredClause(Hooks &hooks, util::BinaryStackReader &reader);
+	bool checkStoredClause(Hooks &hooks, util::BinaryStackReader &reader, std::vector<Bool3> &model);
 
 	template<typename Hooks>
-	void extendEquivalent(Hooks &hooks, uint32_t base_offset);
+	void extendEquivalent(Hooks &hooks, uint32_t base_offset, std::vector<Bool3> &model);
 
 	template<typename Hooks>
-	void extendDistributed(Hooks &hooks, uint32_t base_offset);
+	void extendDistributed(Hooks &hooks, uint32_t base_offset, std::vector<Bool3> &model);
 
 	template<typename Hooks>
-	void extendBlockedClause(Hooks &hooks, uint32_t base_offset);
+	void extendBlockedClause(Hooks &hooks, uint32_t base_offset, std::vector<Bool3> &model);
 
 	template<typename Hooks>
-	void buildModel(Hooks &hooks);
+	void buildModel(Hooks &hooks, std::vector<Bool3> &model);
 };
 
 template<typename Hooks>
@@ -111,81 +111,83 @@ void ExtModelConfigStruct::pushBlockedClause(Hooks &hooks, typename Hooks::Claus
 }
 
 template<typename Hooks>
-bool ExtModelConfigStruct::checkStoredClause(Hooks &hooks, util::BinaryStackReader &reader) {
+bool ExtModelConfigStruct::checkStoredClause(Hooks &hooks, util::BinaryStackReader &reader, std::vector<Bool3> &model) {
 	bool satisfied = false;
 	uint32_t length = reader.template read<uint32_t>();
 	for(uint32_t i = 0; i < length; ++i) {
 		auto lit = Hooks::Literal::fromIndex(reader.template read<uint32_t>());
-		if(hooks.modelGetLiteral(lit))
+	
+		Bool3 var_state = model[lit.variable().toNumber()];
+		if(lit.isOneLiteral() ? var_state.isTrue() : var_state.isFalse())
 			satisfied = true;
 	}
 	return satisfied;
 }
 
 template<typename Hooks>
-void ExtModelConfigStruct::extendEquivalent(Hooks &hooks, uint32_t base_offset) {
+void ExtModelConfigStruct::extendEquivalent(Hooks &hooks, uint32_t base_offset, std::vector<Bool3> &model) {
 	util::BinaryStackReader reader(p_dataStack, base_offset);
 	
 	auto var = Hooks::Variable::fromIndex(reader.template read<uint32_t>());
 	auto zero_equivalent = Hooks::Literal::fromIndex(reader.template read<uint32_t>());
 
-	if(hooks.modelGetLiteral(zero_equivalent)) {
-		hooks.modelSetVariable(var, false);
-	}else hooks.modelSetVariable(var, true);
+	Bool3 var_state = model[zero_equivalent.variable().toNumber()];
+	if(zero_equivalent.isOneLiteral() ? var_state.isTrue() : var_state.isFalse()) {
+		model[var.toNumber()] = false3();
+	}else model[var.toNumber()] = true3();
 }
 
 template<typename Hooks>
-void ExtModelConfigStruct::extendDistributed(Hooks &hooks, uint32_t base_offset) {
+void ExtModelConfigStruct::extendDistributed(Hooks &hooks, uint32_t base_offset, std::vector<Bool3> &model) {
 	util::BinaryStackReader reader(p_dataStack, base_offset);
 
 	// try to set the variable to one first
 	auto var = Hooks::Variable::fromIndex(reader.template read<uint32_t>());
-	hooks.modelSetVariable(var, true);
+	model[var.toNumber()] = true3();
 
 	uint32_t count = reader.template read<uint32_t>();
 	for(uint32_t i = 0; i < count; ++i) {
-		if(checkStoredClause(hooks, reader))
+		if(checkStoredClause(hooks, reader, model))
 			continue;
 		// that did not satisfy the formula, so the variable must be zero
-		hooks.modelSetVariable(var, false);
+		model[var.toNumber()] = false3();
 		return;
 	}
 }
 
 template<typename Hooks>
-void ExtModelConfigStruct::extendBlockedClause(Hooks &hooks, uint32_t base_offset) {
+void ExtModelConfigStruct::extendBlockedClause(Hooks &hooks, uint32_t base_offset, std::vector<Bool3> &model) {
 	util::BinaryStackReader reader(p_dataStack, base_offset);
 
 	auto blocking = Hooks::Literal::fromIndex(reader.template read<uint32_t>());
 
 	// check the current model first
-	if(checkStoredClause(hooks, reader))
+	if(checkStoredClause(hooks, reader, model))
 		return;
 	// didn't satisfy the clause so the blocking literal must be set
-	hooks.modelSetVariable(blocking.variable(), blocking.isOneLiteral());
+	model[blocking.variable().toNumber()] = blocking.isOneLiteral() ? true3() : false3();
 }
 
 template<typename Hooks>
-void ExtModelConfigStruct::buildModel(Hooks &hooks) {
+void ExtModelConfigStruct::buildModel(Hooks &hooks, std::vector<Bool3> &model) {
 	// set all model assignments to the current assignment
 	for(auto it = hooks.varsBegin(); it != hooks.varsEnd(); ++it) {
-		if(!hooks.varAssigned(*it))  {
-			// TODO: memorize unassigned variables
-			hooks.modelSetVariable(*it, false);
-		}else hooks.modelSetVariable(*it, hooks.varOne(*it));
+		if(!hooks.varAssigned(*it))
+			continue;
+		model[(*it).toNumber()] = hooks.varOne(*it) ? true3() : false3();
 	}
 
 	for(auto i = p_descriptorStack.rbegin(); i != p_descriptorStack.rend(); ++i) {
 		util::BinaryStackReader reader(p_dataStack, (*i).baseOffset);
 		if((*i).tag == TagType::kTagFact) {
 			auto literal = Hooks::Literal::fromIndex(reader.template read<uint32_t>());
-			hooks.modelSetVariable(literal.variable(), literal.isOneLiteral());
+			model[literal.variable().toNumber()] = literal.isOneLiteral() ? true3() : false3();
 		}else if((*i).tag == TagType::kTagEquivalent) {
-			extendEquivalent(hooks, (*i).baseOffset);
+			extendEquivalent(hooks, (*i).baseOffset, model);
 		}else if((*i).tag == TagType::kTagDistributed) {
-			extendDistributed(hooks, (*i).baseOffset);
+			extendDistributed(hooks, (*i).baseOffset, model);
 		}else if((*i).tag == TagType::kTagBlockedClause) {
-			extendBlockedClause(hooks, (*i).baseOffset);
+			extendBlockedClause(hooks, (*i).baseOffset, model);
 		}else SYS_CRITICAL("Illegal tag\n");
 	}
 }

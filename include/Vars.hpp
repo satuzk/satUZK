@@ -241,7 +241,6 @@ public:
 	typedef uint8_t Flags;
 	static const Flags kVarflagDeleted = 1;
 	static const Flags kVarflagSavedOne = 2;
-	static const Flags kVarflagModelOne = 4;
 	// true if the variable must not be eliminted
 	static const Flags kVarflagProtected = 8;
 
@@ -406,10 +405,6 @@ public:
 	bool getVarFlagSaved(Variable var) { return p_varflags[var.getIndex()] & kVarflagSavedOne; }
 	void setVarFlagSaved(Variable var) { p_varflags[var.getIndex()] |= kVarflagSavedOne; }
 	void clearVarFlagSaved(Variable var) { p_varflags[var.getIndex()] &= ~kVarflagSavedOne; }
-	
-	Flags getVarFlagModel(Variable var) { return p_varflags[var.getIndex()] & kVarflagModelOne; }
-	void setVarFlagModel(Variable var) { p_varflags[var.getIndex()] |= kVarflagModelOne; }
-	void clearVarFlagModel(Variable var) { p_varflags[var.getIndex()] &= ~kVarflagModelOne; }
 	
 	Flags getVarFlagProtected(Variable var) { return p_varflags[var.getIndex()] & kVarflagProtected; }
 	void setVarFlagProtected(Variable var) { p_varflags[var.getIndex()] |= kVarflagProtected; }

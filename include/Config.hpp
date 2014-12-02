@@ -203,23 +203,6 @@ public:
 		return p_vsidsConfig.getActivity(var);
 	}
 
-	// returns true if the model value of the variable is one
-	bool modelGetVariable(Variable var) {
-		return p_varConfig.getVarFlagModel(var);
-	}
-	void modelSetVariable(Variable var, bool value) {
-		//TODO: allow unassigned variables in model
-		p_varConfig.clearVarFlagModel(var);
-		if(value)
-			p_varConfig.setVarFlagModel(var);
-	}
-	// returns true if the model value of the literal is true
-	bool modelGetLiteral(Literal lit) {
-		if(lit.isOneLiteral())
-			return modelGetVariable(lit.variable());
-		return !modelGetVariable(lit.variable());
-	}
-	
 	/* ----------------- CLAUSE MANAGEMENT FUNCTIONS ----------------------- */
 
 	bool clauseContains(Clause clause, Literal literal);

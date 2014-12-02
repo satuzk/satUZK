@@ -309,14 +309,15 @@ int main(int argc, char **argv) {
 		if(result == satuzk::kStateSatisfied) {
 			model_stream << "SAT\n";
 			
-			config.p_extModelConfig.buildModel(config);
+			std::vector<Bool3> model;
+			model.resize(read_hooks.numVariables() + 1, undefined3());
+			config.p_extModelConfig.buildModel(config, model);
 			
 			for(long i = 1; i <= read_hooks.numVariables(); ++i) {
-				auto intern_variable = read_hooks.internVariable(i);
 				if(i != 1)
 					model_stream << " ";
 				// TODO: don't include non-assigned variables?
-				if(config.modelGetLiteral(intern_variable.oneLiteral())) {
+				if(model[i].isTrue()) {
 					model_stream << i;
 				}else model_stream << -i;
 			}
@@ -329,16 +330,23 @@ int main(int argc, char **argv) {
 		if(result == satuzk::kStateSatisfied) {
 			std::cout << "s SATISFIABLE" << std::endl;
 
-			config.p_extModelConfig.buildModel(config);
+			std::vector<Bool3> model;
+			model.resize(read_hooks.numVariables() + 1, undefined3());
+			config.p_extModelConfig.buildModel(config, model);
 			
 			if(show_model) {
 				std::cout << "v";
 				for(long i = 1; i <= read_hooks.numVariables(); ++i) {
-					auto intern_variable = read_hooks.internVariable(i);
 					// TODO: don't include non-assigned variables?
-					if(config.modelGetLiteral(intern_variable.oneLiteral())) {
+					if(model[i].isTrue()) {
 						std::cout << " " << i;
-					}else std::cout << " " << -i;
+					}else if(model[i].isFalse()) {
+						std::cout << " " << -i;
+					}else{
+						std::cout << std::endl;
+						std::cout << "c " << i << " is free" << std::endl;
+						std::cout << "v";
+					}
 				}
 				std::cout << " 0" << std::endl;
 			}
