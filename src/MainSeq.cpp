@@ -192,6 +192,7 @@ void onInterrupt(int sig) {
 }
 
 int main(int argc, char **argv) {
+	std::cout << "c this is satUZK-seq, '" << CONFIG_BRANCH << "' branch" << std::endl;
 	std::cout << "c revision " << CONFIG_REVISION
 #ifdef CONFIG_DIRTY
 		<< "*"
