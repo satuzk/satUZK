@@ -21,22 +21,22 @@ public:
 	
 	VariableType() : p_index(-1) { }
 	
-	Index getIndex() {
+	Index getIndex() const {
 		return p_index;
 	}
-	int64_t toNumber() {
+	int64_t toNumber() const {
 		return p_index + 1;
 	}
 	
-	bool operator== (const VariableType<BaseDefs> &other) {
+	bool operator== (const VariableType<BaseDefs> &other) const {
 		return p_index == other.p_index;
 	}
-	bool operator!= (const VariableType<BaseDefs> &other) {
+	bool operator!= (const VariableType<BaseDefs> &other) const {
 		return p_index != other.p_index;
 	}
 
-	LiteralType<BaseDefs> zeroLiteral();
-	LiteralType<BaseDefs> oneLiteral();
+	LiteralType<BaseDefs> zeroLiteral() const;
+	LiteralType<BaseDefs> oneLiteral() const;
 private:
 	explicit VariableType(Index index) : p_index(index) { }
 	
@@ -61,31 +61,31 @@ public:
 
 	LiteralType() : p_index(-1) { }
 	
-	Index getIndex() {
+	Index getIndex() const {
 		return p_index;
 	}
-	int64_t toNumber() {
+	int64_t toNumber() const {
 		return isOneLiteral() ? variable().toNumber() : -variable().toNumber();
 	}
 	
-	bool operator== (const LiteralType<BaseDefs> &other) {
+	bool operator== (const LiteralType<BaseDefs> &other) const {
 		return p_index == other.p_index;
 	}
-	bool operator!= (const LiteralType<BaseDefs> &other) {
+	bool operator!= (const LiteralType<BaseDefs> &other) const {
 		return p_index != other.p_index;
 	}
 
-	VariableType<BaseDefs> variable() {
+	VariableType<BaseDefs> variable() const {
 		return VariableType<BaseDefs>::fromIndex(p_index >> 1);
 	}
 	
-	bool isOneLiteral() {
+	bool isOneLiteral() const {
 		return p_index & 1;
 	}
-	int polarity() {
+	int polarity() const {
 		return isOneLiteral() ? 1 : -1;
 	}
-	LiteralType<BaseDefs> inverse() {
+	LiteralType<BaseDefs> inverse() const {
 		return LiteralType<BaseDefs>::fromIndex(p_index ^ 1);
 	}
 
@@ -96,11 +96,11 @@ private:
 };
 
 template <typename BaseDefs>
-LiteralType<BaseDefs> VariableType<BaseDefs>::zeroLiteral() {
+LiteralType<BaseDefs> VariableType<BaseDefs>::zeroLiteral() const {
 	return LiteralType<BaseDefs>::fromIndex(p_index << 1);
 }
 template <typename BaseDefs>
-LiteralType<BaseDefs> VariableType<BaseDefs>::oneLiteral() {
+LiteralType<BaseDefs> VariableType<BaseDefs>::oneLiteral() const {
 	return LiteralType<BaseDefs>::fromIndex((p_index << 1) + 1);
 }
 
