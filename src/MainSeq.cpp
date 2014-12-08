@@ -216,6 +216,7 @@ int main(int argc, char **argv) {
 
 	std::string instance;
 	std::string model_file;
+	std::vector<int> assumptions;
 	for(auto i = args.begin(); i != args.end(); /* no increment here */) {
 		if(*i == "-v") {
 			config.opts.general.verbose = 3;
@@ -247,6 +248,14 @@ int main(int argc, char **argv) {
 				return 0;
 			}
 			config.seedRandomEngine(std::atoi((*i).c_str()));
+			++i;
+		}else if(*i == "-assume") {
+			++i;
+			if(i == args.end()) {
+				std::cout << "Expected argument for -assume" << std::endl;
+				return 0;
+			}
+			assumptions.push_back(std::stoi((*i)));
 			++i;
 		}else if(*i == "-show-model") {
 			show_model = true;
@@ -300,6 +309,12 @@ int main(int argc, char **argv) {
 
 	std::cout << "c parse time: " << sysGetCpuTime() << " ms" << std::endl;
 	std::cout << "c parse memory: " << sysPeakMemory() << " kb" << std::endl;
+
+	for(auto it = assumptions.begin(); it != assumptions.end(); ++it) {
+		OurConfig::Literal literal = OurConfig::Literal::fromNumber(*it);
+		config.lockVariable(literal.variable());
+		config.assumptionEnable(literal);
+	}
 
 	satuzk::SolveState result = solve(config);
 

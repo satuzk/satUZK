@@ -40,8 +40,13 @@ bool Config<BaseDefs, Hooks>::varIsPresent(Config<BaseDefs, Hooks>::Variable var
 }
 
 template<typename BaseDefs, typename Hooks>
+void Config<BaseDefs, Hooks>::lockVariable(Config<BaseDefs, Hooks>::Variable var) {
+	p_varConfig.setVarFlagProtected(var);
+}
+
+template<typename BaseDefs, typename Hooks>
 bool Config<BaseDefs, Hooks>::varIsLocked(Config<BaseDefs, Hooks>::Variable var) {
-	return false; //FIXME
+	return p_varConfig.getVarFlagProtected(var);
 }
 
 template<typename BaseDefs, typename Hooks>
@@ -1008,6 +1013,7 @@ template<typename BaseDefs, typename Hooks>
 void Config<BaseDefs, Hooks>::assumptionEnable(Config<BaseDefs, Hooks>::Literal literal) {
 	SYS_ASSERT(SYS_ASRT_GENERAL, !p_varConfig.getLitFlagAssumption(literal));
 	SYS_ASSERT(SYS_ASRT_GENERAL, !varAssigned(literal.variable()));
+	SYS_ASSERT(SYS_ASRT_GENERAL, varIsLocked(literal.variable()));
 	p_varConfig.setLitFlagAssumption(literal);
 
 	p_assumptionList.push_back(literal);

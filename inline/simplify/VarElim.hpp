@@ -133,6 +133,8 @@ void vecdEliminateAll(Hooks &hooks) {
 	}
 
 	for(auto i = queue.begin(); i != queue.end(); ++i) {
+		if(hooks.varIsLocked(*i))
+			continue;
 		if(!vecdIsWorthwhile(hooks, *i))
 			continue;
 		vecdEliminateVariable(hooks, *i);

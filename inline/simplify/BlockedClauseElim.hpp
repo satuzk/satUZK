@@ -21,11 +21,14 @@ bool bceBlocks(Hooks &hooks, typename Hooks::Clause clause,
 template<typename Hooks>
 bool bceBlocked(Hooks &hooks, typename Hooks::Clause clause,
 		typename Hooks::Literal &blocking) {
-	for(auto i = hooks.clauseBegin(clause); i != hooks.clauseEnd(clause); ++i)
+	for(auto i = hooks.clauseBegin(clause); i != hooks.clauseEnd(clause); ++i) {
+		if(hooks.varIsLocked((*i).variable()))
+			continue;
 		if(bceBlocks(hooks, clause, *i)) {
 			blocking = *i;
 			return true;
 		}
+	}
 	return false;
 }
 
