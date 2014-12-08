@@ -9,19 +9,27 @@ LIBS = -lrt
 testing:
 	./mkconfig.sh testing
 	$(CPP) -o satUZK-seq $(CPP_ARGS) $(LINK_FLAGS) -O3 src/MainSeq.cpp $(CPP_SOURCE) $(LIBS)
+testing-par:
+	./mkconfig.sh testing-par
 	$(CPP) -o satUZK-par $(CPP_ARGS) $(LINK_FLAGS) -O3 src/MainPar.cpp $(CPP_SOURCE) $(LIBS)
 
 debug:
 	./mkconfig.sh debug
 	$(CPP) -o satUZK-seq $(CPP_ARGS) $(LINK_FLAGS) -g src/MainSeq.cpp $(CPP_SOURCE) $(LIBS)
+debug-par:
+	./mkconfig.sh debug-par
 	$(CPP) -o satUZK-par $(CPP_ARGS) $(LINK_FLAGS) -g src/MainPar.cpp $(CPP_SOURCE) $(LIBS)
 optdebug:
 	./mkconfig.sh optdebug
 	$(CPP) -o satUZK-seq $(CPP_ARGS) $(LINK_FLAGS) -g -O3 -fno-omit-frame-pointer src/MainSeq.cpp $(CPP_SOURCE) $(LIBS)
+optdebug-par:
+	./mkconfig.sh optdebug-par
 	$(CPP) -o satUZK-par $(CPP_ARGS) $(LINK_FLAGS) -g -O3 -fno-omit-frame-pointer src/MainPar.cpp $(CPP_SOURCE) $(LIBS)
 
 profile-google:
 	./mkconfig.sh profile-google
 	$(CPP) -o satUZK-seq $(CPP_ARGS) -DFEATURE_GOOGLE_PROFILE $(LINK_FLAGS) -fno-omit-frame-pointer -g -O3 src/MainSeq.cpp $(CPP_SOURCE) $(LIBS) -lprofiler
+profile-google-par:
+	./mkconfig.sh profile-google-par
 	$(CPP) -o satUZK-par $(CPP_ARGS) -DFEATURE_GOOGLE_PROFILE $(LINK_FLAGS) -fno-omit-frame-pointer -g -O3 src/MainPar.cpp $(CPP_SOURCE) $(LIBS) -lprofiler
 
