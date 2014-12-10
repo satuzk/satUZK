@@ -199,6 +199,11 @@ int main(int argc, char **argv) {
 #endif
 		<< std::endl;
 	std::cout << "c '" << CONFIG_TARGET << "' build from " << CONFIG_DATE << " utc" << std::endl;
+	
+	std::cout << "c args:";
+	for(int i = 0; i < argc; i++)
+		std::cout << ' ' << argv[i];
+	std::cout << std::endl;
 
 	OurConfig &config = *the_config;
 	config.opts.general.verbose = 1;
