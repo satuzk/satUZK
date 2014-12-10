@@ -108,7 +108,10 @@ void unhideStamp(Hooks &hooks,
 			/* TODO: make sure this substitution is legal */
 			auto root1 = hooks.litEquivalent(literal);
 			auto root2 = hooks.litEquivalent(equivalent);
-			if(root1 != root2 && !hooks.varIsLocked(literal.variable())) {
+			if(root1 != root2
+					/* TODO: allow substitution if equivalent.variable() is not locked */
+					&& !hooks.varIsLocked(equivalent.variable())
+					&& !hooks.varIsLocked(literal.variable())) {
 				hooks.litJoin(equivalent, literal);
 				hooks.litJoin(equivalent.inverse(), literal.inverse());
 				hooks.stat.simp.sccVariables++;

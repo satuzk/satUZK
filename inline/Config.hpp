@@ -19,6 +19,7 @@ typename Config<BaseDefs, Hooks>::Variable Config<BaseDefs, Hooks>::varAlloc() {
 
 template<typename BaseDefs, typename Hooks>
 void Config<BaseDefs, Hooks>::deleteVar(Config<BaseDefs, Hooks>::Variable var) {
+	SYS_ASSERT(SYS_ASRT_GENERAL, varIsPresent(var));
 	p_varConfig.deleteVar(var);
 };
 
