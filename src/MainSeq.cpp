@@ -23,7 +23,6 @@
 #include "../inline/sys/Performance.hpp"
 #include "../inline/util/BulkAlloc.hpp"
 #include "../inline/util/BinaryHeap.hpp"
-#include "../inline/util/BinaryStack.hpp"
 #include "../inline/util/Bool3.hpp"
 #include "../inline/util/SimpleVector.hpp"
 
