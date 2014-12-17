@@ -444,7 +444,7 @@ int main(int argc, char **argv) {
 		<< ", hidden tautologies: " << config.stat.simp.unhideHteClauses << std::endl;
 	
 	std::cout << "c    [      ]  space used for saved infos: "
-			<< (config.p_extModelConfig.p_dataStack.getOffset() / 1024) << " kb" << std::endl;
+			<< (config.p_extModelConfig.getUsedSpace() / 1024) << " kb" << std::endl;
 
 	std::cout << "c ------ time ------" << std::endl;
 	std::cout << "c    [      ]  inprocessing: "
